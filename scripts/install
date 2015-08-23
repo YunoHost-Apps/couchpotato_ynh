@@ -17,6 +17,7 @@ app_id=couchpotato
 app_user=couchpotato
 app_install_dir=/opt/yunohost/$app_id
 app_data_dir=/home/yunohost.app/$app_id
+app_logs_dir=$app_data_dir/logs
 app_pid_file=/var/run/$app_id/$app_id.pid
 app_config_file=$app_data_dir/config.ini
 app_init_file=$app_install_dir/init/ubuntu
@@ -101,7 +102,7 @@ if [[ $app_host == "127.0.0.1" ]]; then
 	sudo chmod +x -R $app_data_dir
 	
 	# Add service to YunoHost's monitoring
-	sudo yunohost service add $app_id --log $app_data_dir/logs/ --status "ps aux | grep $app_id | grep -v grep"
+	sudo yunohost service add $app_id --log $app_logs_dir/ --status "ps aux | grep $app_id | grep -v grep"
 	
 	# Start daemon at boot
 	sudo update-rc.d $app_id defaults
