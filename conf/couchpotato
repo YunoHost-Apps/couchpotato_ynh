@@ -1,0 +1,15 @@
+# COPY THIS FILE TO /etc/default/couchpotato 
+# OPTIONS: CP_HOME, CP_USER, CP_DATA, CP_PIDFILE, PYTHON_BIN, CP_OPTS, SSD_OPTS, CP_PORT
+
+## EXAMPLE if want to run as different user
+## add CP_USER=username to /etc/default/couchpotato
+## otherwise default couchpotato is used
+
+CP_USER=USERTOCHANGE         						#$RUN_AS, username to run couchpotato under, the default is couchpotato
+CP_HOME=APPDIRTOCHANGE					#$APP_PATH, the location of couchpotato.py, the default is /opt/couchpotato
+CP_DATA=DATADIRTOCHANGE					#$DATA_DIR, the location of couchpotato.db, cache, logs, the default is /opt/couchpotato
+CP_PIDFILE=PIDFILETOCHANGE      			#$PID_FILE, the location of couchpotato.pid, the default is /var/run/couchpotato/couchpotato.pid
+PYTHON_BIN=PYTBINTOCHANGE      					#$DAEMON, the location of the python binary, the default is /usr/bin/python
+CP_OPTS=" --config=OPTSTOCHANGE"        	#$EXTRA_DAEMON_OPTS, extra cli option for couchpotato, i.e. " --config_file=/home/couchpotato/couchpotato.ini"
+#SSD_OPTS=SSDTOCHANGE       						#$EXTRA_SSD_OPTS, extra start-stop-daemon option like " --group=users"
+#CP_PORT=PORTTOCHANGE         							#$PORT_OPTS, hardcoded port for the webserver, overrides value in couchpotato.ini
