@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Common variable declaration
-app_id=htpc-manager
-app_user=htpc-manager
+app_id=couchpotato
+app_user=couchpotato
 app_install_dir="/opt/yunohost/${app_id}"
 app_data_dir="/home/yunohost.app/${app_id}"
 

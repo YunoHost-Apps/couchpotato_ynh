@@ -106,8 +106,8 @@ if [[ $app_method == "LOCAL"* ]]; then
 	# Start daemon at boot
 	sudo update-rc.d $app_id defaults
 	
-	# Reload daemon
-	sudo service $app_id restart
+	# Start service
+	sudo service $app_id start
 	
 	# Set proxy host variable
 	app_host="http://${app_local_host}:${app_port}${app_path%/}"
