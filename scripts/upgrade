@@ -24,7 +24,7 @@ app_host="$(sudo yunohost app setting ${app_id} host)"
 # Make upgrade if localhost installation
 if [[ $app_method == "LOCAL"* ]]; then
 
-	# Kill App
+	# Kill app
 	sudo service $app_id stop
 	sudo killall $app_id
 	
@@ -47,7 +47,7 @@ if [[ $app_method == "LOCAL"* ]]; then
 	sudo chmod +x /etc/init.d/$app_id
 	sudo chmod +x -R $app_install_dir
 	
-	# Reload daemon
+	# Start service
 	sudo service $app_id start
 	
 fi
