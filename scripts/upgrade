@@ -1,75 +1,100 @@
 #!/bin/bash
+	app=$YNH_APP_INSTANCE_NAME
+	source="https://github.com/CouchPotato/CouchPotatoServer"
 
-# Basic variable declaration
-BASEDIR="$(dirname "$(pwd)")"
+# Backup the current version of the app, restore it if the upgrade fails
+	EXIT_PROPERLY () {
+		trap '' EXIT
+		set +e
+		sudo yunohost backup restore --ignore-hooks $app-before-upgrade --apps $app --force --quiet	# Restore the backup if upgrade failed
+		ynh_die "Upgrade failed. The app was restored to the way it was before the failed upgrade."
+	}
+	if [[ -n $(sudo yunohost backup info $app-before-upgrade || true) ]]; then
+		sudo yunohost backup delete $app-before-upgrade
+	fi
+	sudo yunohost backup create --ignore-hooks --apps $app --name $app-before-upgrade --quiet
+	set -e
+	trap EXIT_PROPERLY ERR
 
-# Common variable declaration
-app_id=couchpotato
-app_user=couchpotato
-app_install_dir="/opt/yunohost/${app_id}"
-app_data_dir="/home/yunohost.app/${app_id}"
-app_logs_dir="/var/log/${app_id}"
-## Sources definitions
-app_src_init="$BASEDIR/conf/${app_id}.init"
-app_src_nginx_conf="$BASEDIR/conf/nginx.conf"
+# Source app helpers
+. /usr/share/yunohost/helpers
 
 # Retrieve arguments
-app_public="$(sudo yunohost app setting ${app_id} public)"
-app_method="$(sudo yunohost app setting ${app_id} method)"
-app_domain="$(sudo yunohost app setting ${app_id} domain)"
-app_path="$(sudo yunohost app setting ${app_id} path)"
-app_host="$(sudo yunohost app setting ${app_id} host)"
+	domain=$(ynh_app_setting_get "$app" domain)
+	path=$(ynh_app_setting_get "$app" path)
+	port=$(ynh_app_setting_get "$app" port)
 
+# Cancel upgrade if the version is too old
+	if [[ -n $(ynh_app_setting_get $app method) ]]; then
+		ynh_die "Your current version is too old and cannot be upgraded.\
+		If you had a local install, please remove the app and reinstall it.\
+		If you had a remote install, please remove the app and install redirect_ynh for this purpose instead."	
+	fi
 
-# Make upgrade if localhost installation
-if [[ $app_method == "LOCAL"* ]]; then
+# Destinations definitions
+	app_install_dir="/opt/yunohost/$app"
+	app_data_dir="/home/yunohost.app/$app"
+	app_logs_dir="/var/log/$app"
+	app_config_file="${app_data_dir}/settings.conf"
+	app_pid_file="/var/run/$app/$app.pid"
+	app_python_bin="/usr/bin/python"
+
+# Upgrade Couchpotato
 
 	# Kill app
-	sudo service $app_id stop
-	sudo killall $app_id
-	
+	sudo service $app stop || true
+
 	# Upgrade to the latest version of app using the fork
 	cd $app_install_dir && sudo git pull
 	cd -
-
-	# Upgrade dependencies
 	
+	# Upgrade dependencies
+	if [[ $(python --version 2>&1) != Python\ 2* ]]; then
+		app_python_bin=$app_install_dir/bin/python
+		sudo apt-get install -y python-pip python-virtualenv python-dev uwsgi uwsgi-plugin-python
+	fi
+
+	# YunoHost multimedia
+		# Add yunohost.multimedia directory
+		wget -qq https://github.com/YunoHost-Apps/yunohost.multimedia/archive/master.zip
+		unzip -qq master.zip
+		sudo ./yunohost.multimedia-master/script/ynh_media_build.sh
+		# Give write access to the yunohost.multimedia directory so that Couchpotato can move Movies to the Movie directory
+		sudo usermod -a -G multimedia $app
+		# Creates the "Movies" subfolder in "Video"
+		sudo mkdir -p "/home/yunohost.multimedia/share/Video/Movies"
+		# Fix permissions
+		sudo ./yunohost.multimedia-master/script/ynh_media_build.sh
+
+
 	# Redirect logs directory
 	if [[ $app_logs_dir != "$app_data_dir"* ]]; then
 		sudo sed -i "s@self.log_dir =.*@self.log_dir = '$app_logs_dir'@g" $app_install_dir/CouchPotato.py
 	fi
+
+	# Permissions
+	sudo chown -R $app:$app $app_install_dir
+	sudo chown -R $app:$app $app_data_dir
 	
-	# Update init file
-	sudo cp -a $app_src_init /etc/init.d/$app_id
-	
-	# Set rights
-	sudo chown -R $app_user $app_install_dir
-	sudo chmod +x /etc/init.d/$app_id
-	sudo chmod +x -R $app_install_dir
-	
+	# Configure service
+	sed -i "s@__PYTHON__@$app_python_bin@g" 		../conf/systemd.service
+	sed -i "s@__APPDIR__@$app_install_dir@g" 		../conf/systemd.service
+	sed -i "s@__DATADIR__@$app_data_dir@g" 			../conf/systemd.service
+	sed -i "s@__PIDFILE__@$app_pid_file@g" 			../conf/systemd.service
+	sed -i "s@__CONFIGFILE__@$app_config_file@g" 	../conf/systemd.service
+	sed -i "s@__USER__@$app@g" 						../conf/systemd.service
+	sudo cp ../conf/systemd.service /etc/systemd/system/$app.service
+	sudo systemctl daemon-reload
+	sudo systemctl enable $app
+	sudo yunohost service add $app
+
 	# Start service
-	sudo service $app_id start
-	
-fi
+	sudo yunohost service start $app
 
-
-# Remove trailing "/" for next commands
-app_path=${app_path%/}
-
-# Configure Nginx 
-sudo sed -i "s@PATHTOCHANGE@$app_path@g" $app_src_nginx_conf
-sudo sed -i "s@HOSTTOCHANGE@$app_host@g" $app_src_nginx_conf
-sudo cp $app_src_nginx_conf /etc/nginx/conf.d/$app_domain.d/$app_id.conf
-
-# If app is public, add url to SSOWat conf as skipped_uris
-if [[ $app_public = "Yes" ]];
-then
-	# See install script
-	sudo yunohost app setting $app_id unprotected_uris -v "/"
-	# Remove old settings
-	sudo yunohost app setting $app_id skipped_uris -d
-fi
+# Configure Nginx and reload
+	sed -i "s@__PATH__@$path@g" ../conf/nginx.conf
+	sed -i "s@__PORT__@$port@g" ../conf/nginx.conf
+	sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
 
 # Reload Nginx and regenerate SSOwat conf
-sudo service nginx reload
-sudo yunohost app ssowatconf
+	sudo service nginx reload

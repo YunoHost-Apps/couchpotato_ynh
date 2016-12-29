@@ -1,56 +1,92 @@
 #!/bin/bash
+	app=$YNH_APP_INSTANCE_NAME
+
+# Source app helpers
+. /usr/share/yunohost/helpers
 
 # Common variable declaration
-app_id=couchpotato
-app_user=couchpotato
-app_install_dir="/opt/yunohost/${app_id}"
-app_data_dir="/home/yunohost.app/${app_id}"
+	app_install_dir="/opt/yunohost/$app"
+	app_data_dir="/home/yunohost.app/$app"
+	app_logs_dir="/var/log/$app"
+	app_python_bin="/usr/bin/python"
 
 # Retrieve arguments
-app_method="$(sudo yunohost app setting ${app_id} method)"
-app_domain="$(sudo yunohost app setting ${app_id} domain)"
+	domain=$(ynh_app_setting_get "$app" domain)
+	path=$(ynh_app_setting_get "$app" path)
 
-# The parameter $1 is the uncompressed restore directory location
-app_backup_dir="$1/apps/${app_id}"
+# Check destination directories
+	[[ -d $app_install_dir ]] && ynh_die \
+	"The destination directory '$app_install_dir' already exists.\
+	 You should safely delete it before restoring this app."
 
+	[[ -d $app_data_dir ]] && ynh_die \
+	"The destination directory '$app_data_dir' already exists.\
+	 You should safely delete it before restoring this app."
 
-# Restore files if localhost installation
-if [[ $app_method == "LOCAL"* ]]; then
+	nginx_conf="/etc/nginx/conf.d/${domain}.d/${app}.conf"
+	[[ -f $nginx_conf ]] && ynh_die \
+	"The NGINX configuration already exists at '${nginx_conf}'.
+	 You should safely delete it before restoring this app."
 
-	# Kill app
-	sudo service $app_id stop
-	sudo killall $app_id
+	systemd_conf="/etc/systemd/system/${app}.service"
+	[[ -f $systemd_conf ]] && ynh_die \
+	"The Systemd configuration already exists at '${systemd_conf}'.
+	 You should safely delete it before restoring this app."
 
-	# Restore sources
-	sudo cp -a $app_backup_dir/sources/. $app_install_dir
+# Kill app if running
+	sudo systemctl stop $app
 
-	# Restore data
-	sudo cp -a $app_backup_dir/data/. $app_data_dir
+# Restore sources
+	sudo mkdir -p $app_install_dir
+	sudo cp -a ./sources/. $app_install_dir
+
+# Restore data
+	sudo mkdir -p $app_data_dir
+	sudo cp -a ./data/. $app_data_dir
+
+# Reinstall dependencies (using virtualenv)
+	if [[ $(python --version 2>&1) != Python\ 2* ]]; then
+		sudo apt-get install -y python-pip python-virtualenv python-dev uwsgi uwsgi-plugin-python
+		sudo virtualenv $app_install_dir
+		sudo bash -c "source $app_install_dir/bin/activate && pip install cheetah"
+	fi
+
+# Recreate app user
+	id -u $app &>/dev/null || sudo useradd --home-dir $app_install_dir --shell /bin/false $app
+
+# YunoHost multimedia
+	# Add yunohost.multimedia directory
+	wget -qq https://github.com/YunoHost-Apps/yunohost.multimedia/archive/master.zip
+	unzip -qq master.zip
+	sudo ./yunohost.multimedia-master/script/ynh_media_build.sh
+	# Give write access to the yunohost.multimedia directory so that Couchpotato can move Movies to the Movie directory
+	sudo usermod -a -G multimedia $app
+	# Creates the "Movies" subfolder in "Video"
+	sudo mkdir -p "/home/yunohost.multimedia/share/Video/Movies"
+	# Fix permissions
+	sudo ./yunohost.multimedia-master/script/ynh_media_build.sh
+
+# Redirect logs directory
+	sudo mkdir -p $app_logs_dir
+	sudo chown -R $app $app_logs_dir
+	sudo chmod +x -R $app_logs_dir
+	sudo sed -i "s@self.log_dir =.*@self.log_dir = '$app_logs_dir'@g" $app_install_dir/CouchPotato.py
+
+# Permissions
+	sudo chown -R $app:$app $app_install_dir
+	sudo chown -R $app:$app $app_data_dir
+
+# Restore daemon config
+	sudo cp -a ./$app.service $systemd_conf
+	sudo systemctl daemon-reload
+	sudo systemctl enable $app
+	sudo yunohost service add $app
+
+# Start service
+	sudo yunohost service start $app
 	
-	# Restore daemon config
-	sudo cp -a $app_backup_dir/conf/$app_id.default /etc/default/$app_id 
-	sudo cp -a $app_backup_dir/conf/$app_id.init /etc/init.d/$app_id
-	
-	# Set rights
-	sudo chown -R $app_user $app_install_dir
-	sudo chown -R $app_user $app_data_dir
-	sudo chmod +x /etc/init.d/$app_id
-	sudo chmod +x -R $app_install_dir
-	sudo chmod +x -R $app_data_dir
-	
-	# Start daemon at boot
-	sudo update-rc.d $app_id defaults
-	
-	# Reload daemon
-	sudo service $app_id restart
-	
-fi
+# Restore Nginx conf
+	sudo cp -a ./nginx.conf "$nginx_conf"
 
-
-# Restore Nginx and YunoHost parameters
-sudo cp -a $app_backup_dir/yunohost/. /etc/yunohost/apps/$app_id
-sudo cp -a $app_backup_dir/nginx.conf /etc/nginx/conf.d/$app_domain.d/$app_id.conf
-
-# Reload Nginx and regenerate SSOwat conf
-sudo service nginx reload
-sudo yunohost app ssowatconf
+# Reload Nginx
+	sudo service nginx reload
