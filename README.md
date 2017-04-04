@@ -1,4 +1,4 @@
-##<img src="https://github.com/binhex/docker-templates/raw/master/binhex/images/couchpotato-icon.png" height="32" align="top"> couchpotato_ynh <a href="https://yunohost.org/#/apps_in_progress_en"><img src="http://pix.toile-libre.org/upload/original/1440352021.png" height="32" align="right"></a>
+## <img src="https://github.com/binhex/docker-templates/raw/master/binhex/images/couchpotato-icon.png" height="32" align="top"> couchpotato_ynh <a href="https://yunohost.org/#/apps_in_progress_en"><img src="http://pix.toile-libre.org/upload/original/1440352021.png" height="32" align="right"></a>
 
 [![Latest Version](https://img.shields.io/badge/version-_--_-green.svg?style=flat)](https://github.com/Snipees/couchpotato_ynh/releases)
 [![Status](https://img.shields.io/badge/status-in_progress-yellow.svg?style=flat)](https://github.com/Snipees/couchpotato_ynh/milestones)
