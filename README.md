@@ -4,20 +4,19 @@
 [![Status](https://img.shields.io/badge/status-in_progress-yellow.svg?style=flat)](https://github.com/Snipees/couchpotato_ynh/milestones)
 [![Dependencies](https://img.shields.io/badge/dependencies-includes-lightgrey.svg?style=flat)](https://github.com/Snipees/couchpotato_ynh#dependencies)
 [![GitHub license](https://img.shields.io/badge/license-GPLv3-blue.svg?style=flat)](https://raw.githubusercontent.com/Snipees/couchpotato_ynh/master/LICENSE)
-[![Yunohost version](https://img.shields.io/badge/yunohost-2.2.0_tested-orange.svg?style=flat)](https://github.com/YunoHost/yunohost)
-[![GitHub issues](https://img.shields.io/github/issues/Snipees/couchpotato_ynh.svg?style=flat)](https://github.com/Snipees/couchpotato_ynh/issues)
+[![Yunohost version](https://img.shields.io/badge/yunohost-2.4.2_tested-orange.svg?style=flat)](https://github.com/YunoHost/yunohost)
+[![GitHub issues](https://img.shields.io/github/issues/YunoHost-Apps/couchpotato_ynh.svg?style=flat)](https://github.com/YunoHost-Apps/couchpotato_ynh/issues)
 	
 [ **CouchPotato Integration for Yunohost** ]  
-This install script uses a Git-fork as sources for a local installation.  
-Otherwise the script sets a reverse-proxy to a remote instance.
+Download movies automatically, easily and in the best quality as soon as they are available.
 
+- Integrates automatically with [transmission_ynh](https://github.com/YunoHost-Apps/transmission_ynh) (or tries to...),
+- Integrates [YunoHost multimedia](https://github.com/YunoHost-Apps/yunohost.multimedia) folder structure
 
 ### How to install:
 - Use **Install software** option from Yunohost admin panel
 - Find textbox tagged as **Install custom App from github**
 - Copy and paste: https://github.com/YunoHost-Apps/couchpotato_ynh
-- Choose the method installation: *local* or *remote* (as described above)
-- Answer the required questions to the selected method
 
 
 ### More information about:
@@ -26,6 +25,7 @@ Otherwise the script sets a reverse-proxy to a remote instance.
 
 
 #### Special Thanks to the Yunohost Community:
+[Snipees](https://github.com/Snipees)
 [anaqreon](https://github.com/anaqreon), 
 [aymhce](https://github.com/aymhce), 
 [beudbeud](https://github.com/abeudin), 

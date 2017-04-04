@@ -1,0 +1,12 @@
+[Unit]
+Description=CouchPotato application instance
+After=network.target
+
+[Service]
+ExecStart=__PYTHON__ __APPDIR__/CouchPotato.py --quiet --pid_file=__PIDFILE__ --data_dir=__DATADIR__ --config_file=__CONFIGFILE__
+Type=simple
+User=__USER__
+Group=__USER__
+
+[Install]
+WantedBy=multi-user.target

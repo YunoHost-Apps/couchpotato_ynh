@@ -1,56 +1,41 @@
 #!/bin/bash
+	#set -eu
+	app=$YNH_APP_INSTANCE_NAME
+
+# Source app helpers
+. /usr/share/yunohost/helpers
 
 # Common variable declaration
-app_id=couchpotato
-app_user=couchpotato
-app_install_dir="/opt/yunohost/${app_id}"
-app_data_dir="/home/yunohost.app/${app_id}"
-app_logs_dir="/var/log/${app_id}"
+	app_install_dir="/opt/yunohost/$app"
+	app_data_dir="/home/yunohost.app/$app"
+	app_logs_dir="/var/log/$app"
 
 # Retrieve arguments
-app_method="$(sudo yunohost app setting ${app_id} method)"
-app_domain="$(sudo yunohost app setting ${app_id} domain)"
-keep_data=$1
+	domain=$(ynh_app_setting_get "$app" domain)
 
-
-# Remove files if localhost installation
-if [[ $app_method == "LOCAL"* ]]; then
-
+# Remove files
 	# Kill app and remove from boot
-	sudo service $app_id stop
-	sudo killall $app_id
-	sudo update-rc.d $app_id remove
+	sudo service $app stop
 	
 	# Delete app user
-	sudo deluser $app_user
+	sudo deluser $app
 	
 	# Remove sources
 	sudo rm -rf $app_install_dir
-
-	# Remove logs
-	if [[ $app_logs_dir != "$app_data_dir"* ]]; then
-		sudo rm -rf $app_logs_dir
-	fi
+	sudo rm -rf $app_data_dir
+	sudo rm -rf $app_logs_dir
 
 	# Remove data
-	if [[ $keep_data == "No" ]]; then
-		sudo rm -rf $app_data_dir
-	fi
+	sudo rm -rf $app_data_dir
 	
-	# Remove daemon config
-	sudo rm -f /etc/init.d/$app_id
-	sudo rm -f /etc/default/$app_id
-	sudo rm -rf /var/run/$app_id
+# Remove service
+	sudo systemctl disable $app.service
+	sudo rm -f /etc/systemd/system/$app.service
+	sudo systemctl daemon-reload
+	sudo yunohost service remove $app
 
-fi
+# Remove nginx configuration file
+	sudo rm -f /etc/nginx/conf.d/$domain.d/$app.conf
 
-
-# Remove Nginx parameters
-sudo rm -f /etc/nginx/conf.d/$app_domain.d/$app_id.conf
-
-# Remove Yunohost service
-sudo yunohost service remove $app_id
-
-# Reload Nginx and update Yunohost
-sudo service nginx reload
-sudo yunohost app ssowatconf
+# Restart services
+	sudo service nginx reload
