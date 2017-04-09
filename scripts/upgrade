@@ -1,4 +1,6 @@
 #!/bin/bash
+
+	set -eu
 	app=$YNH_APP_INSTANCE_NAME
 	source="https://github.com/CouchPotato/CouchPotatoServer"
 
