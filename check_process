@@ -24,10 +24,10 @@
     Level 1=auto
     Level 2=auto
     Level 3=auto
-    Level 4=1
-    Level 5=1
+    Level 4=1	# The app is single-user and does not support LDAP. It is therefore protected behind SSO.
+    Level 5=1	# See https://github.com/YunoHost/package_linter/issues/15
     Level 6=auto
     Level 7=auto
     Level 8=0
     Level 9=0
-	Level 10=0
+    Level 10=0
