@@ -1,5 +1,6 @@
 #!/bin/bash
-	#set -eu
+	
+	set -u
 	app=$YNH_APP_INSTANCE_NAME
 
 # Source app helpers
