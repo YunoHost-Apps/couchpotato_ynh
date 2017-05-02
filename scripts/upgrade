@@ -19,7 +19,7 @@
 	trap EXIT_PROPERLY ERR
 
 # Source app helpers
-. /usr/share/yunohost/helpers
+	source /usr/share/yunohost/helpers
 
 # Retrieve arguments
 	domain=$(ynh_app_setting_get "$app" domain)
@@ -98,5 +98,9 @@
 	sed -i "s@__PORT__@$port@g" ../conf/nginx.conf
 	sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
 
+# Open the /api path so that external applications can connect
+	ynh_app_setting_set "$app" unprotected_uris "/api"
+
 # Reload Nginx and regenerate SSOwat conf
 	sudo service nginx reload
+	sudo yunohost app ssowatconf

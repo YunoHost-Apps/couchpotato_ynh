@@ -3,7 +3,7 @@
 	app=$YNH_APP_INSTANCE_NAME
 
 # Source app helpers
-. /usr/share/yunohost/helpers
+	source /usr/share/yunohost/helpers
 
 # Common variable declaration
 	app_install_dir="/opt/yunohost/$app"

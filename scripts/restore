@@ -4,7 +4,7 @@
 	app=$YNH_APP_INSTANCE_NAME
 
 # Source app helpers
-. /usr/share/yunohost/helpers
+	source /usr/share/yunohost/helpers
 
 # Common variable declaration
 	app_install_dir="/opt/yunohost/$app"
@@ -34,9 +34,6 @@
 	[[ -f $systemd_conf ]] && ynh_die \
 	"The Systemd configuration already exists at '${systemd_conf}'.
 	 You should safely delete it before restoring this app."
-
-# Kill app if running
-	sudo systemctl stop $app
 
 # Restore sources
 	sudo mkdir -p $app_install_dir
@@ -90,5 +87,9 @@
 # Restore Nginx conf
 	sudo cp -a ./nginx.conf "$nginx_conf"
 
-# Reload Nginx
+# Open the /api path so that external applications can connect
+	ynh_app_setting_set "$app" unprotected_uris "/api"
+
+# Reload Nginx and regenerate SSOwat conf
 	sudo service nginx reload
+	sudo yunohost app ssowatconf
