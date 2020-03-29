@@ -1,5 +1,7 @@
 ## <img src="https://github.com/binhex/docker-templates/raw/master/binhex/images/couchpotato-icon.png" height="32" align="top"> couchpotato_ynh <a href="https://yunohost.org/#/apps_in_progress_en"><img src="http://pix.toile-libre.org/upload/original/1440352021.png" height="32" align="right"></a>
 
+[![Integration level](https://dash.yunohost.org/integration/couchpotato.svg)](https://dash.yunohost.org/appci/app/couchpotato) ![](https://ci-apps.yunohost.org/ci/badges/couchpotato.status.svg) ![](https://ci-apps.yunohost.org/ci/badges/couchpotato.maintain.svg)
+
 [![Latest Version](https://img.shields.io/badge/version-_--_-green.svg?style=flat)](https://github.com/Snipees/couchpotato_ynh/releases)
 [![Status](https://img.shields.io/badge/status-in_progress-yellow.svg?style=flat)](https://github.com/Snipees/couchpotato_ynh/milestones)
 [![Dependencies](https://img.shields.io/badge/dependencies-includes-lightgrey.svg?style=flat)](https://github.com/Snipees/couchpotato_ynh#dependencies)
