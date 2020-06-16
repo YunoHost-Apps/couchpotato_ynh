@@ -1,0 +1,6 @@
+SOURCE_URL=https://github.com/YunoHost-Apps/yunohost.multimedia/archive/v1.2.tar.gz
+SOURCE_SUM=7dfc07e32d7842f87274ef780cb9757a7679573cbbeb095c5f86ef76806f5d95
+SOURCE_SUM_PRG=sha256sum
+SOURCE_FORMAT=tar.gz
+SOURCE_IN_SUBDIR=true
+SOURCE_FILENAME=

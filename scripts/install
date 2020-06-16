@@ -1,160 +1,304 @@
 #!/bin/bash
 
-	set -eu
-	app=$YNH_APP_INSTANCE_NAME
-	source="https://github.com/CouchPotato/CouchPotatoServer"
+#=================================================
+# GENERIC START
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
 
+source _common.sh
+source /usr/share/yunohost/helpers
 
-# Source app helpers
-	source /usr/share/yunohost/helpers
+#=================================================
+# MANAGE SCRIPT FAILURE
+#=================================================
 
-# Retrieve arguments
-	domain=$YNH_APP_ARG_DOMAIN
-	path=$YNH_APP_ARG_PATH
+ynh_clean_setup () {
+	true
+}
+# Exit if an error occurs during the execution of the script
+ynh_abort_if_errors
 
-# Correct path: puts a / at the start and nothing at the end
-	if [ "${path:0:1}" != "/" ]; then
-		path="/$path"
-	fi
-	if [ "${path:${#path}-1}" == "/" ] && [ ${#path} -gt 1 ]; then
-		path="${path:0:${#path}-1}"
-	fi
+#=================================================
+# RETRIEVE ARGUMENTS FROM THE MANIFEST
+#=================================================
 
-# Check domain/path availability
-	sudo yunohost app checkurl "${domain}${path}" -a "$app" \
-		|| ynh_die "Path not available: ${domain}${path}"
+domain=$YNH_APP_ARG_DOMAIN
+path_url=$YNH_APP_ARG_PATH
 
-# Destinations definitions
-	app_install_dir="/opt/yunohost/$app"
-	app_data_dir="/home/yunohost.app/$app"
-	app_logs_dir="/var/log/$app"
-	app_config_file="${app_data_dir}/settings.conf"
-	app_pid_file="/var/run/$app/$app.pid"
-	app_python_bin="/usr/bin/python"
+app=$YNH_APP_INSTANCE_NAME
 
-# Install Couchpotato
+#=================================================
+# CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
+#=================================================
+ynh_script_progression --message="Validating installation parameters..."
 
-	# Get first available port
-	port=5050
-	sudo yunohost app checkport $port
-	while [[ ! $? -eq 0 ]]; do
-		port=$((port+1))
-		sudo yunohost app checkport $port
-	done
-	ynh_app_setting_set "$app" port "$port"
-	
-	# Make directories
-	sudo mkdir -p $app_data_dir
-	sudo mkdir -p $app_install_dir
-	
-	# Install latest version of app using the fork
-	sudo git clone $source $app_install_dir
-	
-	# Install dependencies (using virtualenv)
-	if [[ $(python --version 2>&1) != Python\ 2* ]]; then
-		app_python_bin=$app_install_dir/bin/python
-		sudo apt-get install -y python-pip python-virtualenv python-dev uwsgi uwsgi-plugin-python
-		sudo virtualenv $app_install_dir
-		sudo bash -c "source $app_install_dir/bin/activate && pip install cheetah"
-	fi
-	
-	# Create app user
-	id -u $app &>/dev/null || sudo useradd --home-dir $app_install_dir --shell /bin/false $app
+final_path=/opt/yunohost/$app
+test ! -e "$final_path" || ynh_die --message="This path already contains a folder"
 
-	# YunoHost multimedia
-		# Add yunohost.multimedia directory
-		wget -qq https://github.com/YunoHost-Apps/yunohost.multimedia/archive/master.zip
-		unzip -qq master.zip
-		sudo ./yunohost.multimedia-master/script/ynh_media_build.sh
-		# Give write access to the yunohost.multimedia directory so that Couchpotato can move Movies to the Movie directory
-		sudo usermod -a -G multimedia $app
-		# Creates the "Movies" subfolder in "Video"
-		sudo mkdir -p "/home/yunohost.multimedia/share/Video/Movies"
-		# Fix permissions
-		sudo ./yunohost.multimedia-master/script/ynh_media_build.sh
+multimedia_final_path=/opt/yunohost/${app}_multimedia
+test ! -e "$multimedia_final_path" || ynh_die --message="This path already contains a folder"
 
-	# Transmission link: Preferred method is direct RPC link. If not available, switch to watchdir.
-	transmission_rpcurl=""
-	transmission_rpcpassword=""
-	transmission_watchdir=""
-	# Check if Transmission is installed
-	if [[ -z $(sudo yunohost app list -i -f transmission | grep -v 'apps:') ]]; then
-		sudo sed -i "s@__RPC__@0@g"			../conf/couchpotato.conf	# Disable Transmission RPC
-		sudo sed -i "s@__BLACKHOLE__@0@g"	../conf/couchpotato.conf	# Disable Transmission Watchdir
-		sudo sed -i "s@__RENAMER__@0@g"		../conf/couchpotato.conf	# Disable Renamer
+app_data_dir=/home/yunohost.app/$app
+test ! -e "$app_data_dir" || ynh_die --message="This path already contains a folder"
+
+# Register (book) web path
+ynh_webpath_register --app=$app --domain=$domain --path_url=$path_url
+
+#=================================================
+# STORE SETTINGS FROM MANIFEST
+#=================================================
+ynh_script_progression --message="Storing installation settings..."
+
+ynh_app_setting_set --app=$app --key=domain --value=$domain
+ynh_app_setting_set --app=$app --key=path --value=$path_url
+ynh_app_setting_set --app=$app --key=multimedia_final_path --value=$multimedia_final_path
+ynh_app_setting_set --app=$app --key=app_data_dir --value=$app_data_dir
+
+#=================================================
+# STANDARD MODIFICATIONS
+#=================================================
+# FIND AND OPEN A PORT
+#=================================================
+ynh_script_progression --message="Configuring firewall..."
+
+# Find an available port
+port=$(ynh_find_port --port=5050)
+ynh_app_setting_set --app=$app --key=port --value=$port
+
+# Optional: Expose this port publicly
+# (N.B. : you only need to do this if the app actually needs to expose the port publicly.
+# If you do this and the app doesn't actually need you are CREATING SECURITY HOLES IN THE SERVER !)
+
+# Open the port
+# ynh_exec_warn_less yunohost firewall allow --no-upnp TCP $port
+
+#=================================================
+# INSTALL DEPENDENCIES
+#=================================================
+ynh_script_progression --message="Installing dependencies..."
+
+ynh_install_app_dependencies $pkg_dependencies
+
+#=================================================
+# DOWNLOAD, CHECK AND UNPACK SOURCE
+#=================================================
+ynh_script_progression --message="Setting up source files..."
+
+ynh_app_setting_set --app=$app --key=final_path --value=$final_path
+# Download, check integrity, uncompress and patch the source from app.src
+ynh_setup_source --dest_dir="$final_path"
+
+#=================================================
+# NGINX CONFIGURATION
+#=================================================
+ynh_script_progression --message="Configuring nginx web server..."
+
+# Create a dedicated nginx config
+ynh_add_nginx_config
+
+#=================================================
+# CREATE DEDICATED USER
+#=================================================
+ynh_script_progression --message="Configuring system user..."
+
+# Create a system user
+ynh_system_user_create --username=$app --home_dir=$final_path
+
+#=================================================
+# SPECIFIC SETUP
+#=================================================
+# MAKE DATA DIRECTORY
+#=================================================
+ynh_script_progression --message="Make data directory..."
+
+# Make directories
+mkdir -p $app_data_dir
+
+#=================================================
+# INSTALL PYTHONZ TO GET PYTHON
+#=================================================
+ynh_print_info --message="Installing Python..."
+
+# Get pythonz
+# curl -kL https://raw.githubusercontent.com/saghul/pythonz/master/pythonz-install
+# ./pythonz-install
+ynh_setup_source --dest_dir="$final_path/.pythonz" --source_id=pythonz
+export PYTHONZ_ROOT="$final_path/.pythonz"
+# Then install it
+python $final_path/.pythonz/pythonz_install.py
+
+# Install Python
+$final_path/.pythonz/bin/pythonz install $python_version
+
+#=================================================
+# BUILD COUCHPOTATO
+#=================================================
+ynh_script_progression --message="Building CouchPotato..."
+
+# Set permissions to app files
+chown -R "$app": "$final_path"
+
+pushd $final_path/
+	virtualenv -p $($final_path/.pythonz/bin/pythonz locate $python_version) ve2
+	ve2/bin/pip install --upgrade pyopenssl
+	ve2/bin/pip install cheetah
+popd
+
+#=================================================
+# INSTALL YUNOHOST MULTIMEDIA
+#=================================================
+ynh_script_progression --message="Install YunoHost multimedia..."
+
+ynh_setup_source --dest_dir="$multimedia_final_path" -source_id=multimedia
+$multimedia_final_path/script/ynh_media_build.sh
+
+# Give write access to the yunohost.multimedia directory so that Couchpotato can move Movies to the Movie directory
+usermod -a -G multimedia $app
+
+# Creates the "Movies" subfolder in "Video"
+mkdir -p "/home/yunohost.multimedia/share/Video/Movies"
+
+# Fix permissions
+$multimedia_final_path/script/ynh_media_build.sh
+
+#=================================================
+# CONFIGURE TRANSMISSION
+#=================================================
+ynh_script_progression --message="Configuring transmission..."
+
+# Transmission link: Preferred method is direct RPC link. If not available, switch to watchdir.
+transmission_rpcurl=""
+transmission_rpcpassword=""
+transmission_watchdir=""
+
+# Check if Transmission is installed
+if [[ -z $(yunohost app list -i -f transmission | grep -v 'apps:') ]]; then
+	ynh_script_progression --message="Transmission is not installed. Disabling link to CouchPotato..."
+	ynh_replace_string --match_string="__RPC__" --replace_string="0" --target_file="../conf/couchpotato.conf"	# Disable Transmission RPC
+	ynh_replace_string --match_string="__BLACKHOLE__" --replace_string="0" --target_file="../conf/couchpotato.conf"	# Disable Transmission Watchdir
+	ynh_replace_string --match_string="__RENAMER__" --replace_string="0" --target_file="../conf/couchpotato.conf"	# Disable Renamer
+else
+	ynh_script_progression --message="Transmission is installed. Trying to link it to CouchPotato..."
+	# Check if the transmission password is in settings
+	if [[ -n $(ynh_app_setting_get --app=transmission --key=rpcpassword || true) ]]; then
+		ynh_script_progression --message="Transmission will be linked to CouchPotato directly"
+		transmission_rpcurl="$(ynh_app_setting_get --app=transmission --key=path)transmission"
+		transmission_rpcpassword=$(ynh_app_setting_get --app=transmission --key=rpcpassword)
+		ynh_replace_string --match_string="__RPC__" --replace_string="1" --target_file="../conf/couchpotato.conf"	# Enable Transmission RPC
+		ynh_replace_string --match_string="__BLACKHOLE__" --replace_string="0" --target_file="../conf/couchpotato.conf"	# Disable Transmission Watchdir
+		ynh_replace_string --match_string="__RENAMER__" --replace_string="1" --target_file="../conf/couchpotato.conf"	# Enable Renamer
+		# If transmission uses YunoHost multimedia, use its folder for the renamer
 	else
-		echo "Transmission is installed. Trying to link it to CouchPotato..."
-		# Check if the transmission password is in settings
-		if [[ -n $(ynh_app_setting_get transmission rpcpassword || true) ]]; then
-			echo "Transmission will be linked to CouchPotato directly"
-			transmission_rpcurl="$(ynh_app_setting_get transmission path)transmission"
-			transmission_rpcpassword=$(ynh_app_setting_get transmission rpcpassword)
-			sudo sed -i "s@__RPC__@1@g"			../conf/couchpotato.conf	# Enable Transmission RPC
-			sudo sed -i "s@__BLACKHOLE__@0@g"	../conf/couchpotato.conf	# Disable Transmission Watchdir
-			sudo sed -i "s@__RENAMER__@1@g"		../conf/couchpotato.conf	# Enable Renamer
-			# If transmission uses YunoHost multimedia, use its folder for the renamer
+	# Check if transmission has watchdir enabled
+		if [[ -n $(ynh_app_setting_get --app=transmission --key=watchdir || true) ]]; then
+			ynh_script_progression --message="Transmission will be linked to CouchPotato with watchdir"
+			transmission_watchdir=$(ynh_app_setting_get --app=transmission --key=watchdir)
+			ynh_replace_string --match_string="__RPC__" --replace_string="0" --target_file="../conf/couchpotato.conf"	# Disable Transmission RPC
+			ynh_replace_string --match_string="__BLACKHOLE__" --replace_string="1" --target_file="../conf/couchpotato.conf"	# Enable Transmission Watchdir
+			ynh_replace_string --match_string="__RENAMER__" --replace_string="1" --target_file="../conf/couchpotato.conf"	# Enable Renamer	
+			# If transmission uses YunoHost multimedia, use its folder for the renamer		
 		else
-			# Check if transmission has watchdir enabled
-			if [[ -n $(ynh_app_setting_get transmission watchdir || true) ]]; then
-				echo "Transmission will be linked to CouchPotato with watchdir"
-				transmission_watchdir=$(ynh_app_setting_get transmission watchdir)
-				sudo sed -i "s@__RPC__@0@g"			../conf/couchpotato.conf	# Disable Transmission RPC
-				sudo sed -i "s@__BLACKHOLE__@1@g"	../conf/couchpotato.conf	# Enable Transmission Watchdir
-				sudo sed -i "s@__RENAMER__@1@g"		../conf/couchpotato.conf	# Enable Renamer	
-				# If transmission uses YunoHost multimedia, use its folder for the renamer		
-			else
-				echo "Cannot link Couchpotato to Transmission because Transmission has no RPC password or watchdir available."
-				sudo sed -i "s@__RPC__@0@g"			../conf/couchpotato.conf	# Disable Transmission RPC
-				sudo sed -i "s@__BLACKHOLE__@0@g"	../conf/couchpotato.conf	# Disable Transmission Watchdir
-				sudo sed -i "s@__RENAMER__@0@g"		../conf/couchpotato.conf	# Disable Renamer
-			fi
+			ynh_script_progression --message="Cannot link Couchpotato to Transmission because Transmission has no RPC password or watchdir available."
+			ynh_replace_string --match_string="__RPC__" --replace_string="0" --target_file="../conf/couchpotato.conf"	# Disable Transmission RPC
+			ynh_replace_string --match_string="__BLACKHOLE__" --replace_string="0" --target_file="../conf/couchpotato.conf"	# Disable Transmission Watchdir
+			ynh_replace_string --match_string="__RENAMER__" --replace_string="0" --target_file="../conf/couchpotato.conf"	# Disable Renamer
 		fi
 	fi
+fi
 
-	# Configure App
-	sudo sed -i "s@__RPCURL__@$transmission_rpcurl@g" 			../conf/couchpotato.conf
-	sudo sed -i "s@__RPCPASSWORD__@$transmission_rpcpassword@g" ../conf/couchpotato.conf
-	sudo sed -i "s@__WATCHDIR__@$transmission_watchdir@g" 		../conf/couchpotato.conf
+#=================================================
+# MODIFY A CONFIG FILE
+#=================================================
+ynh_script_progression --message="Modifying a config file..."
 
-	sudo sed -i "s@__PATH__@$path@g" 							../conf/couchpotato.conf
-	sudo sed -i "s@__PORT__@$port@g" 							../conf/couchpotato.conf
-	sudo sed -i "s@__DATADIR__@$app_data_dir@g" 				../conf/couchpotato.conf
+app_config_file="${final_path}/settings.conf"
 
-	sudo cp -a ../conf/couchpotato.conf $app_config_file
-	
-	# Redirect logs directory
-	sudo mkdir -p $app_logs_dir
-	sudo chown -R $app $app_logs_dir
-	sudo chmod +x -R $app_logs_dir
-	sudo sed -i "s@self.log_dir =.*@self.log_dir = '$app_logs_dir'@g" $app_install_dir/CouchPotato.py
+# Configure App
+ynh_replace_string --match_string="__RPCURL__" --replace_string="$transmission_rpcurl" --target_file="../conf/couchpotato.conf"
+ynh_replace_string --match_string="__RPCPASSWORD__" --replace_string="$transmission_rpcpassword" --target_file="../conf/couchpotato.conf"
+ynh_replace_string --match_string="__WATCHDIR__" --replace_string="$transmission_watchdir" --target_file="../conf/couchpotato.conf"
 
-	# Permissions
-	sudo chown -R $app:$app $app_install_dir
-	sudo chown -R $app:$app $app_data_dir
-	
-	# Configure service
-	sed -i "s@__PYTHON__@$app_python_bin@g" 		../conf/systemd.service
-	sed -i "s@__APPDIR__@$app_install_dir@g" 		../conf/systemd.service
-	sed -i "s@__DATADIR__@$app_data_dir@g" 			../conf/systemd.service
-	sed -i "s@__PIDFILE__@$app_pid_file@g" 			../conf/systemd.service
-	sed -i "s@__CONFIGFILE__@$app_config_file@g" 	../conf/systemd.service
-	sed -i "s@__USER__@$app@g" 						../conf/systemd.service
-	sudo cp ../conf/systemd.service /etc/systemd/system/$app.service
-	sudo systemctl daemon-reload
-	sudo systemctl enable $app
-	sudo yunohost service add $app
+ynh_replace_string --match_string="__PATH__" --replace_string="$path" --target_file="../conf/couchpotato.conf"
+ynh_replace_string --match_string="__PORT__" --replace_string="$port@" --target_file="../conf/couchpotato.conf"
+ynh_replace_string --match_string="__DATADIR__" --replace_string="$app_data_dir" --target_file="../conf/couchpotato.conf"
 
-	# Start service
-	sudo yunohost service start $app
+cp -a ../conf/couchpotato.conf $app_config_file
 
-# Configure Nginx and reload
-	sed -i "s@__PATH__@$path@g" ../conf/nginx.conf
-	sed -i "s@__PORT__@$port@g" ../conf/nginx.conf
-	sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
+# Calculate and store the config file checksum into the app settings
+ynh_store_file_checksum --file="$app_config_file"
+
+#=================================================
+# CONFIGURE LOGS
+#=================================================
+ynh_script_progression --message="Configuring logs..."
+
+# Redirect logs directory
+app_logs_dir="/var/log/$app"
+mkdir -p $app_logs_dir
+chown -R $app $app_logs_dir
+chmod +x -R $app_logs_dir
+ynh_replace_string --match_string="self.log_dir =.*" --replace_string="self.log_dir = '$app_logs_dir'" --target_file="$final_path/CouchPotato.py"
+
+#=================================================
+# SETUP SYSTEMD
+#=================================================
+ynh_script_progression --message="Configuring a systemd service..."
+
+# Create a dedicated systemd config
+ynh_add_systemd_config --others_var="app_data_dir"
+
+#=================================================
+# GENERIC FINALIZATION
+#=================================================
+# SECURE FILES AND DIRECTORIES
+#=================================================
+ynh_script_progression --message="Securing files and directories..."
+
+# Set permissions to app files
+chown -R $app:$app $final_path
+chown -R $app:$app $app_data_dir
+
+#=================================================
+# SETUP LOGROTATE
+#=================================================
+ynh_script_progression --message="Configuring log rotation..."
+
+# Use logrotate to manage application logfile(s)
+ynh_use_logrotate
+
+#=================================================
+# INTEGRATE SERVICE IN YUNOHOST
+#=================================================
+ynh_script_progression --message="Integrating service in YunoHost..."
+
+yunohost service add $app --description "CouchPotato Daemon" --log "/var/log/$app/$app.log"
+
+#=================================================
+# START SYSTEMD SERVICE
+#=================================================
+ynh_script_progression --message="Starting a systemd service..."
+
+# Start a systemd service
+ynh_systemd_action --service_name=$app --action="start" --log_path="/var/log/$app/$app.log"
+
+#=================================================
+# SETUP SSOWAT
+#=================================================
+ynh_script_progression --message="Configuring SSOwat..."
 
 # Open the /api path so that external applications can connect
-	ynh_app_setting_set "$app" unprotected_uris "/api"
+ynh_app_setting_set --app=$app --key=unprotected_uris --value="/api"
 
-# Reload Nginx and regenerate SSOwat conf
-	sudo service nginx reload
-	sudo yunohost app ssowatconf
+#=================================================
+# RELOAD NGINX
+#=================================================
+ynh_script_progression --message="Reloading nginx web server..."
+
+ynh_systemd_action --service_name=nginx --action=reload
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_script_progression --message="Installation of $app completed"
