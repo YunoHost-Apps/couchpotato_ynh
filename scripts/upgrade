@@ -7,6 +7,8 @@
 #=================================================
 
 source _common.sh
+source ynh_install_python
+source ynh_multimedia_3
 source /usr/share/yunohost/helpers
 
 #=================================================
@@ -139,24 +141,12 @@ ynh_script_progression --message="Building CouchPotato..."
 # Set permissions to app files
 chown -R "$app": "$final_path"
 
-pushd $final_path/
-	virtualenv -p $($final_path/.pythonz/bin/pythonz locate $python_version) ve2
-	ve2/bin/pip install --upgrade pyopenssl
-	ve2/bin/pip install cheetah
-popd
+ynh_install_python --python_version=$PHYTON_VERSION
 
-#=================================================
-# BUILD COUCHPOTATO
-#=================================================
-ynh_script_progression --message="Building CouchPotato..."
-
-# Set permissions to app files
-chown -R "$app": "$final_path"
-
-pushd $final_path/
-	virtualenv -p $($final_path/.pythonz/bin/pythonz locate $python_version) ve2
-	ve2/bin/pip install --upgrade pyopenssl
-	ve2/bin/pip install cheetah
+pushd $final_path
+	pyenv virtualenv $PHYTON_VERSION $app
+	/opt/pyenv/versions/$app/bin/pip install --upgrade pyopenssl
+	/opt/pyenv/versions/$app/bin/pip install cheetah
 popd
 
 #=================================================
@@ -164,17 +154,16 @@ popd
 #=================================================
 ynh_script_progression --message="Install YunoHost multimedia..."
 
-ynh_setup_source --dest_dir="$multimedia_final_path" -source_id=multimedia
-$multimedia_final_path/script/ynh_media_build.sh
+ynh_multimedia_build_main_dir
 
 # Give write access to the yunohost.multimedia directory so that Couchpotato can move Movies to the Movie directory
-usermod -a -G multimedia $app
+ynh_multimedia_addaccess $app
 
 # Creates the "Movies" subfolder in "Video"
 mkdir -p "/home/yunohost.multimedia/share/Video/Movies"
 
 # Fix permissions
-$multimedia_final_path/script/ynh_media_build.sh
+/home/yunohost.multimedia/ynh_media_build.sh
 
 #=================================================
 # CONFIGURE LOGS
