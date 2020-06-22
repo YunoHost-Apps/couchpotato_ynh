@@ -8,7 +8,7 @@
 pkg_dependencies=""
 #python-pip python-virtualenv python-dev uwsgi uwsgi-plugin-python
 
-PHYTON_VERSION=2.7.18
+python_version=2.7.18
 
 #=================================================
 # PERSONAL HELPERS

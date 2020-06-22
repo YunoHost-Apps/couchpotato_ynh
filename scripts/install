@@ -121,12 +121,11 @@ ynh_script_progression --message="Building CouchPotato..."
 # Set permissions to app files
 chown -R "$app": "$final_path"
 
-ynh_install_python --python_version=$PHYTON_VERSION
+ynh_install_python --python_version=$python_version
 
 pushd $final_path
-	pyenv virtualenv $PHYTON_VERSION $app
-	/opt/pyenv/versions/$app/bin/pip install --upgrade pyopenssl
-	/opt/pyenv/versions/$app/bin/pip install cheetah
+	/opt/pyenv/versions/$python_version/bin/pip install --upgrade pyopenssl
+	/opt/pyenv/versions/$python_version/bin/pip install cheetah
 popd
 
 #=================================================
@@ -229,7 +228,7 @@ ynh_replace_string --match_string="self.log_dir =.*" --replace_string="self.log_
 ynh_script_progression --message="Configuring a systemd service..."
 
 # Create a dedicated systemd config
-ynh_add_systemd_config --others_var="app_data_dir"
+ynh_add_systemd_config --others_var="app_data_dir python_version"
 
 #=================================================
 # GENERIC FINALIZATION

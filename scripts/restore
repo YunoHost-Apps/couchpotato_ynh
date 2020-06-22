@@ -96,10 +96,10 @@ ynh_script_progression --message="Building CouchPotato..."
 # Set permissions to app files
 chown -R "$app": "$final_path"
 
-ynh_install_python --python_version=$PHYTON_VERSION
+ynh_install_python --python_version=$python_version
 
 pushd $final_path
-	pyenv virtualenv $PHYTON_VERSION $app
+	pyenv virtualenv $python_version $app
 	/opt/pyenv/versions/$app/bin/pip install --upgrade pyopenssl
 	/opt/pyenv/versions/$app/bin/pip install cheetah
 popd
