@@ -25,8 +25,8 @@ final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 app_data_dir=$(ynh_app_setting_get --app=$app --key=app_data_dir)
 
 # Destinations definitions
-	app_logs_dir="/var/log/$app"
-	app_python_bin="/usr/bin/python"
+app_logs_dir="/var/log/$app"
+app_python_bin="/usr/bin/python"
 
 #=================================================
 # CHECK VERSION
