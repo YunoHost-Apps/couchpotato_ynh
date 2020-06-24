@@ -49,16 +49,22 @@ elif [ "$is_public" = "No" ]; then
 	is_public=0
 fi
 # Cancel upgrade if the version is too old
-	if [[ -n $(ynh_app_setting_get $app method) ]]; then
-		ynh_die "Your current version is too old and cannot be upgraded.\
-		If you had a local install, please remove the app and reinstall it.\
-		If you had a remote install, please remove the app and install redirect_ynh for this purpose instead."	
-	fi
+if [[ -n $(ynh_app_setting_get $app method) ]]; then
+	ynh_die "Your current version is too old and cannot be upgraded.\
+	If you had a local install, please remove the app and reinstall it.\
+	If you had a remote install, please remove the app and install redirect_ynh for this purpose instead."	
+fi
 
 # If final_path doesn't exist, create it
 if [ -z "$final_path" ]; then
 	final_path=/var/www/$app
 	ynh_app_setting_set --app=$app --key=final_path --value=$final_path
+fi
+
+# If app_data_dir doesn't exist, create it
+if [ -z "$app_data_dir" ]; then
+	app_data_dir=/home/yunohost.app/$app
+	ynh_app_setting_set --app=$app --key=app_data_dir --value=$app_data_dir
 fi
 
 #=================================================
