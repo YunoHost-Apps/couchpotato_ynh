@@ -171,6 +171,74 @@ mkdir -p "/home/yunohost.multimedia/share/Video/Movies"
 /home/yunohost.multimedia/ynh_media_build.sh
 
 #=================================================
+# CONFIGURE TRANSMISSION
+#=================================================
+ynh_script_progression --message="Configuring transmission..."
+
+# Transmission link: Preferred method is direct RPC link. If not available, switch to watchdir.
+transmission_rpcurl=""
+transmission_rpcpassword=""
+transmission_watchdir=""
+
+# Check if Transmission is installed
+if [[ -z $(yunohost app list -i -f transmission | grep -v 'apps:') ]]; then
+	ynh_script_progression --message="Transmission is not installed. Disabling link to CouchPotato..."
+	ynh_replace_string --match_string="__RPC__" --replace_string="0" --target_file="../conf/couchpotato.conf"	# Disable Transmission RPC
+	ynh_replace_string --match_string="__BLACKHOLE__" --replace_string="0" --target_file="../conf/couchpotato.conf"	# Disable Transmission Watchdir
+	ynh_replace_string --match_string="__RENAMER__" --replace_string="0" --target_file="../conf/couchpotato.conf"	# Disable Renamer
+else
+	ynh_script_progression --message="Transmission is installed. Trying to link it to CouchPotato..."
+	# Check if the transmission password is in settings
+	if [[ -n $(ynh_app_setting_get --app=transmission --key=rpcpassword || true) ]]; then
+		ynh_script_progression --message="Transmission will be linked to CouchPotato directly"
+		transmission_rpcurl="$(ynh_app_setting_get --app=transmission --key=path)transmission"
+		transmission_rpcpassword=$(ynh_app_setting_get --app=transmission --key=rpcpassword)
+		ynh_replace_string --match_string="__RPC__" --replace_string="1" --target_file="../conf/couchpotato.conf"	# Enable Transmission RPC
+		ynh_replace_string --match_string="__BLACKHOLE__" --replace_string="0" --target_file="../conf/couchpotato.conf"	# Disable Transmission Watchdir
+		ynh_replace_string --match_string="__RENAMER__" --replace_string="1" --target_file="../conf/couchpotato.conf"	# Enable Renamer
+		# If transmission uses YunoHost multimedia, use its folder for the renamer
+	else
+	# Check if transmission has watchdir enabled
+		if [[ -n $(ynh_app_setting_get --app=transmission --key=watchdir || true) ]]; then
+			ynh_script_progression --message="Transmission will be linked to CouchPotato with watchdir"
+			transmission_watchdir=$(ynh_app_setting_get --app=transmission --key=watchdir)
+			ynh_replace_string --match_string="__RPC__" --replace_string="0" --target_file="../conf/couchpotato.conf"	# Disable Transmission RPC
+			ynh_replace_string --match_string="__BLACKHOLE__" --replace_string="1" --target_file="../conf/couchpotato.conf"	# Enable Transmission Watchdir
+			ynh_replace_string --match_string="__RENAMER__" --replace_string="1" --target_file="../conf/couchpotato.conf"	# Enable Renamer	
+			# If transmission uses YunoHost multimedia, use its folder for the renamer		
+		else
+			ynh_script_progression --message="Cannot link Couchpotato to Transmission because Transmission has no RPC password or watchdir available."
+			ynh_replace_string --match_string="__RPC__" --replace_string="0" --target_file="../conf/couchpotato.conf"	# Disable Transmission RPC
+			ynh_replace_string --match_string="__BLACKHOLE__" --replace_string="0" --target_file="../conf/couchpotato.conf"	# Disable Transmission Watchdir
+			ynh_replace_string --match_string="__RENAMER__" --replace_string="0" --target_file="../conf/couchpotato.conf"	# Disable Renamer
+		fi
+	fi
+fi
+
+#=================================================
+# MODIFY A CONFIG FILE
+#=================================================
+ynh_script_progression --message="Modifying a config file..."
+
+app_config_file="${final_path}/settings.conf"
+
+# Configure App
+ynh_replace_string --match_string="__RPCURL__" --replace_string="$transmission_rpcurl" --target_file="../conf/couchpotato.conf"
+ynh_replace_string --match_string="__RPCPASSWORD__" --replace_string="$transmission_rpcpassword" --target_file="../conf/couchpotato.conf"
+ynh_replace_string --match_string="__WATCHDIR__" --replace_string="$transmission_watchdir" --target_file="../conf/couchpotato.conf"
+
+ynh_replace_string --match_string="__PATH__" --replace_string="$path_url" --target_file="../conf/couchpotato.conf"
+ynh_replace_string --match_string="__PORT__" --replace_string="$port" --target_file="../conf/couchpotato.conf"
+ynh_replace_string --match_string="__DATADIR__" --replace_string="$app_data_dir" --target_file="../conf/couchpotato.conf"
+
+ynh_backup_if_checksum_is_different --file=$app_config_file
+
+cp -a ../conf/couchpotato.conf $app_config_file
+
+# Calculate and store the config file checksum into the app settings
+ynh_store_file_checksum --file="$app_config_file"
+
+#=================================================
 # CONFIGURE LOGS
 #=================================================
 ynh_script_progression --message="Configuring logs..."
