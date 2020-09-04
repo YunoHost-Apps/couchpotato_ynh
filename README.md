@@ -1,30 +1,32 @@
-## <img src="https://github.com/binhex/docker-templates/raw/master/binhex/images/couchpotato-icon.png" height="32" align="top"> couchpotato_ynh <a href="https://yunohost.org/#/apps_in_progress_en"><img src="http://pix.toile-libre.org/upload/original/1440352021.png" height="32" align="right"></a>
+## <img src="https://github.com/binhex/docker-templates/raw/master/binhex/images/couchpotato-icon.png" height="32" align="top"> CouchPotato <a href="https://yunohost.org/#/apps_in_progress_en"><img src="http://pix.toile-libre.org/upload/original/1440352021.png" height="32" align="right"></a>
 
-[![Integration level](https://dash.yunohost.org/integration/couchpotato.svg)](https://dash.yunohost.org/appci/app/couchpotato) ![](https://ci-apps.yunohost.org/ci/badges/couchpotato.status.svg) ![](https://ci-apps.yunohost.org/ci/badges/couchpotato.maintain.svg)
+[![Integration level](https://dash.yunohost.org/integration/couchpotato.svg)](https://dash.yunohost.org/appci/app/couchpotato) ![](https://ci-apps.yunohost.org/ci/badges/couchpotato.status.svg) ![](https://ci-apps.yunohost.org/ci/badges/couchpotato.maintain.svg)  
+[![Install CouchPotato with YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=couchpotato)
 
-[![Latest Version](https://img.shields.io/badge/version-_--_-green.svg?style=flat)](https://github.com/Snipees/couchpotato_ynh/releases)
-[![Status](https://img.shields.io/badge/status-in_progress-yellow.svg?style=flat)](https://github.com/Snipees/couchpotato_ynh/milestones)
-[![Dependencies](https://img.shields.io/badge/dependencies-includes-lightgrey.svg?style=flat)](https://github.com/Snipees/couchpotato_ynh#dependencies)
-[![GitHub license](https://img.shields.io/badge/license-GPLv3-blue.svg?style=flat)](https://raw.githubusercontent.com/Snipees/couchpotato_ynh/master/LICENSE)
-[![Yunohost version](https://img.shields.io/badge/yunohost-2.4.2_tested-orange.svg?style=flat)](https://github.com/YunoHost/yunohost)
-[![GitHub issues](https://img.shields.io/github/issues/YunoHost-Apps/couchpotato_ynh.svg?style=flat)](https://github.com/YunoHost-Apps/couchpotato_ynh/issues)
-	
-[ **CouchPotato Integration for Yunohost** ]  
+> *This package allows you to install CouchPotato quickly and simply on a YunoHost server.  
+If you don't have YunoHost, please consult [the guide](https://yunohost.org/#/install) to learn how to install it.*
+
+## Overview
 Download movies automatically, easily and in the best quality as soon as they are available.
 
 - Integrates automatically with [transmission_ynh](https://github.com/YunoHost-Apps/transmission_ynh) (or tries to...),
 - Integrates [YunoHost multimedia](https://github.com/YunoHost-Apps/yunohost.multimedia) folder structure
 
-### How to install:
-- Use **Install software** option from Yunohost admin panel
-- Find textbox tagged as **Install custom App from github**
-- Copy and paste: https://github.com/YunoHost-Apps/couchpotato_ynh
+**Shipped version:** 3.0.1
 
+## YunoHost specific features
 
-### More information about:
-- CouchPotato : https://couchpota.to
-- Yunohost : 	https://yunohost.org
+#### Supported architectures
 
+* x86-64 - [![Build Status](https://ci-apps.yunohost.org/ci/logs/couchpotato%20%28Apps%29.svg)](https://ci-apps.yunohost.org/ci/apps/couchpotato/)
+* ARMv8-A - [![Build Status](https://ci-apps-arm.yunohost.org/ci/logs/couchpotato%20%28Apps%29.svg)](https://ci-apps-arm.yunohost.org/ci/apps/couchpotato/)
+
+## Links
+
+ * Report a bug: https://github.com/YunoHost-Apps/couchpotato_ynh/issues
+ * App website: https://couchpota.to
+ * Upstream app repository: https://github.com/CouchPotato/CouchPotatoServer
+ * YunoHost website: https://yunohost.org/
 
 #### Special Thanks to the Yunohost Community:
 [Snipees](https://github.com/Snipees)
@@ -47,3 +49,17 @@ Download movies automatically, easily and in the best quality as soon as they ar
 [scith](https://github.com/scith), 
 [tifred](https://github.com/drfred1981), 
 ... :dizzy:
+
+---
+
+Developer info
+----------------
+
+Please send your pull request to the [testing branch](https://github.com/YunoHost-Apps/couchpotato_ynh/tree/testing).
+
+To try the testing branch, please proceed like that.
+```
+sudo yunohost app install https://github.com/YunoHost-Apps/couchpotato_ynh/tree/testing --debug
+or
+sudo yunohost app upgrade couchpotato -u https://github.com/YunoHost-Apps/couchpotato_ynh/tree/testing --debug
+```

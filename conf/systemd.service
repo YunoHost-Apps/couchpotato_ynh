@@ -3,10 +3,12 @@ Description=CouchPotato application instance
 After=network.target
 
 [Service]
-ExecStart=__PYTHON__ __APPDIR__/CouchPotato.py --quiet --pid_file=__PIDFILE__ --data_dir=__DATADIR__ --config_file=__CONFIGFILE__
 Type=simple
-User=__USER__
-Group=__USER__
+User=__APP__
+Group=__APP__
+WorkingDirectory=__FINALPATH__/
+ExecStart=/opt/pyenv/versions/__PYTHON_VERSION__/bin/python __FINALPATH__/CouchPotato.py --quiet --pid_file=/var/run/__APP__/__APP__.pid --data_dir=__APP_DATA_DIR__ --config_file=__FINALPATH__/settings.conf
+
 
 [Install]
 WantedBy=multi-user.target

@@ -1,0 +1,6 @@
+SOURCE_URL=https://github.com/CouchPotato/CouchPotatoServer/archive/7260c12f72447ddb6f062367c6dfbda03ecd4e9c.tar.gz
+SOURCE_SUM=2944f73f1630ada31e24d47df678c4412bd6acc93295ce2915179a75ecfd5dd1
+SOURCE_SUM_PRG=sha256sum
+SOURCE_FORMAT=tar.gz
+SOURCE_IN_SUBDIR=true
+SOURCE_FILENAME=
