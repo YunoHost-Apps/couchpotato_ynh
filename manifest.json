@@ -8,14 +8,14 @@
     },
     "version": "3.0.1~ynh1",
     "url": "https://couchpota.to/",
-    "license": "free",
+    "license": "GPL-3.0-only",
     "maintainer": {
         "name": "Snipees",
         "email": "snipees@wareziens.net",
         "url": "https://github.com/Snipees"
     },
     "requirements": {
-        "yunohost": ">= 3.5"
+        "yunohost": ">= 3.8.1"
     },
     "multi_instance": false,
     "services": [
