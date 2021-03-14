@@ -268,9 +268,10 @@ ynh_systemd_action --service_name=$app --action="start" --log_path="/var/log/$ap
 # SETUP SSOWAT
 #=================================================
 ynh_script_progression --message="Configuring SSOwat..."
+ynh_permission_update --permission="main" --add="visitors"
 
 # Open the /api path so that external applications can connect
-ynh_app_setting_set --app=$app --key=unprotected_uris --value="/api"
+
 
 #=================================================
 # RELOAD NGINX
