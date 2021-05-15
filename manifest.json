@@ -6,7 +6,7 @@
         "en": "Automatic movie downloader",
         "fr": "Téléchargement automatisé de film"
     },
-    "version": "3.0.1~ynh1",
+    "version": "3.0.1~ynh2",
     "url": "https://couchpota.to/",
     "license": "GPL-3.0-only",
     "maintainer": {
