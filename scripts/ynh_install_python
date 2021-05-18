@@ -21,14 +21,14 @@ ynh_install_pyenv () {
   # Build an app.src for pyenv
   mkdir -p "../conf"
   echo "SOURCE_URL=https://github.com/pyenv/pyenv/archive/v${pyenv_version}.tar.gz
-SOURCE_SUM=e93466735ac9c34d68b7d5d71f32c16a2b4b1a6a1adffb85acc4126a3398b9d0" > "../conf/pyenv.src"
+SOURCE_SUM=e93466735ac9c34d68b7d5d71f32c16a2b4b1a6a1adffb85acc4126a3398b9d0" > "$YNH_APP_BASEDIR/conf/pyenv.src"
   # Download and extract pyenv
   ynh_setup_source "$pyenv_install_dir" pyenv
 
   # Build an app.src for pyenv-virtualenv
   mkdir -p "../conf"
   echo "SOURCE_URL=https://github.com/pyenv/pyenv-virtualenv/archive/v${pyenv_virtualenv_version}.tar.gz
-SOURCE_SUM=27ae3de027a6f6dccdca4085225512e559c6b94b31625bd2b357a18890a1e618" > "../conf/pyenv-virtualenv.src"
+SOURCE_SUM=27ae3de027a6f6dccdca4085225512e559c6b94b31625bd2b357a18890a1e618" > "$YNH_APP_BASEDIR/conf/pyenv-virtualenv.src"
   # Download and extract pyenv-virtualenv
   ynh_setup_source "$pyenv_install_dir/plugins/pyenv-virtualenv" pyenv-virtualenv
 
