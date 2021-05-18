@@ -205,7 +205,7 @@ ynh_script_progression --message="Adding a configuration file..."
 
 ynh_add_config --template="../conf/couchpotato.conf" --destination="$final_path/settings.conf"
 
-chmod 400 "$final_path/settings.conf"
+chmod 600 "$final_path/settings.conf"
 chown $app:$app "$final_path/settings.conf"
 
 #=================================================
@@ -224,7 +224,7 @@ ynh_script_progression --message="Configuring logs..."
 # Redirect logs directory
 app_logs_dir="/var/log/$app"
 mkdir -p $app_logs_dir
-chown -R $app $app_logs_dir
+chown -R $app:$app $app_logs_dir
 chmod +x -R $app_logs_dir
 ynh_replace_string --match_string="self.log_dir =.*" --replace_string="self.log_dir = '$app_logs_dir'" --target_file="$final_path/CouchPotato.py"
 
