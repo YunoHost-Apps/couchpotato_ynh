@@ -166,7 +166,7 @@ transmission_rpcpassword=""
 transmission_watchdir=""
 
 # Check if Transmission is installed
-if [[ -z $(yunohost app list -i -f transmission | grep -v 'apps:') ]]; then
+if [[ -z $(yunohost app list | grep -q 'id: $transmission') ]]; then
 	
 	ynh_script_progression --message="Transmission is not installed. Disabling link to CouchPotato..."
 	rpc="0"
