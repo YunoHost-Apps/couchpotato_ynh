@@ -87,9 +87,9 @@ ynh_install_app_dependencies $pkg_dependencies
 ynh_script_progression --message="Building CouchPotato..."
 
 ynh_install_python --python_version=$python_version
+ynh_use_python
 
 pushd $final_path
-	pyenv virtualenv $python_version $app
 	/opt/pyenv/versions/$app/bin/pip install --upgrade pyopenssl
 	/opt/pyenv/versions/$app/bin/pip install cheetah
 popd

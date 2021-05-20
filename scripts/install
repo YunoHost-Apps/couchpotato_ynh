@@ -125,6 +125,7 @@ chown -R $app:$app "$app_data_dir"
 ynh_script_progression --message="Building CouchPotato..."
 
 ynh_install_python --python_version=$python_version
+ynh_use_python
 
 pushd $final_path
 	/opt/pyenv/versions/$python_version/bin/pip install --upgrade pyopenssl
