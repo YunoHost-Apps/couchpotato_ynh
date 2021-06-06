@@ -6,10 +6,9 @@
 # IMPORT GENERIC HELPERS
 #=================================================
 
-#Keep this path for calling _common.sh inside the execution's context of backup and restore scripts
+# Keep this path for calling _common.sh inside the execution's context of backup and restore scripts
 source ../settings/scripts/_common.sh
 source ../settings/scripts/ynh_install_python
-source ../settings/scripts/ynh_multimedia_3
 source /usr/share/yunohost/helpers
 
 #=================================================
@@ -25,7 +24,7 @@ ynh_abort_if_errors
 #=================================================
 # LOAD SETTINGS
 #=================================================
-ynh_script_progression --message="Loading settings..."
+ynh_script_progression --message="Loading installation settings..."
 
 app=$YNH_APP_INSTANCE_NAME
 
@@ -43,24 +42,15 @@ ynh_webpath_available --domain=$domain --path_url=$path_url \
 	|| ynh_die --message="Path not available: ${domain}${path_url}"
 test ! -d $final_path \
 	|| ynh_die --message="There is already a directory: $final_path "
-test ! -d $app_data_dir \
-	|| ynh_die --message="There is already a directory: $app_data_dir "
 
 #=================================================
 # STANDARD RESTORATION STEPS
 #=================================================
 # RESTORE THE NGINX CONFIGURATION
 #=================================================
-ynh_script_progression --message="Restoring the nginx configuration..."
+ynh_script_progression --message="Restoring the NGINX configuration..."
 
 ynh_restore_file --origin_path="/etc/nginx/conf.d/$domain.d/$app.conf"
-
-#=================================================
-# RESTORE THE APP MAIN DIR
-#=================================================
-ynh_script_progression --message="Restoring the app main directory..."
-
-ynh_restore_file --origin_path="$final_path"
 
 #=================================================
 # RECREATE THE DEDICATED USER
@@ -71,12 +61,15 @@ ynh_script_progression --message="Recreating the dedicated system user..."
 ynh_system_user_create --username=$app --home_dir=$final_path
 
 #=================================================
-# RESTORE USER RIGHTS
+# RESTORE THE APP MAIN DIR
 #=================================================
-ynh_script_progression --message="Restoring user rights..."
+ynh_script_progression --message="Restoring the app main directory..."
 
-# Restore permissions on app files
-chown -R $app:$app $final_path
+ynh_restore_file --origin_path="$final_path"
+
+chmod 750 "$final_path"
+chmod -R o-rwx "$final_path"
+chown -R $app:$app "$final_path"
 
 #=================================================
 # SPECIFIC RESTORATION
@@ -93,13 +86,10 @@ ynh_install_app_dependencies $pkg_dependencies
 #=================================================
 ynh_script_progression --message="Building CouchPotato..."
 
-# Set permissions to app files
-chown -R "$app": "$final_path"
-
 ynh_install_python --python_version=$python_version
+ynh_use_python
 
 pushd $final_path
-	pyenv virtualenv $python_version $app
 	/opt/pyenv/versions/$app/bin/pip install --upgrade pyopenssl
 	/opt/pyenv/versions/$app/bin/pip install cheetah
 popd
@@ -109,25 +99,25 @@ popd
 #=================================================
 ynh_script_progression --message="Restoring the data directory..."
 
-ynh_restore_file --origin_path="$app_data_dir"
+ynh_restore_file --origin_path="$app_data_dir" --not_mandatory
 
-chown -R $app:$app $app_data_dir
+mkdir -p "$app_data_dir"
+chmod 750 "$app_data_dir"
+chmod -R o-rwx "$app_data_dir"
+chown -R $app:$app "$app_data_dir"
 
 #=================================================
 # INSTALL YUNOHOST MULTIMEDIA
 #=================================================
 ynh_script_progression --message="Install YunoHost multimedia..."
 
+# Creates the "Movies" subfolder in "Video"
+mkdir -p "$MEDIA_DIRECTORY/share/Video/Movies"
+
 ynh_multimedia_build_main_dir
 
 # Give write access to the yunohost.multimedia directory so that Couchpotato can move Movies to the Movie directory
 ynh_multimedia_addaccess $app
-
-# Creates the "Movies" subfolder in "Video"
-mkdir -p "/home/yunohost.multimedia/share/Video/Movies"
-
-# Fix permissions
-/home/yunohost.multimedia/ynh_media_build.sh
 
 #=================================================
 # CONFIGURE LOGS
@@ -137,7 +127,7 @@ ynh_script_progression --message="Configuring logs..."
 # Redirect logs directory
 app_logs_dir="/var/log/$app"
 mkdir -p $app_logs_dir
-chown -R $app $app_logs_dir
+chown -R $app:$app $app_logs_dir
 chmod +x -R $app_logs_dir
 ynh_replace_string --match_string="self.log_dir =.*" --replace_string="self.log_dir = '$app_logs_dir'" --target_file="$final_path/CouchPotato.py"
 
@@ -147,14 +137,14 @@ ynh_replace_string --match_string="self.log_dir =.*" --replace_string="self.log_
 ynh_script_progression --message="Restoring the systemd configuration..."
 
 ynh_restore_file --origin_path="/etc/systemd/system/$app.service"
-systemctl enable $app.service
+systemctl enable $app.service --quiet
 
 #=================================================
 # INTEGRATE SERVICE IN YUNOHOST
 #=================================================
 ynh_script_progression --message="Integrating service in YunoHost..."
 
-yunohost service add $app --description "A short description of the app" --log "/var/log/$app/$app.log"
+yunohost service add $app --description="CouchPotato Daemon" --log="/var/log/$app/$app.log"
 
 #=================================================
 # START SYSTEMD SERVICE
@@ -175,7 +165,7 @@ ynh_restore_file --origin_path="/etc/logrotate.d/$app"
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reloading nginx web server..."
+ynh_script_progression --message="Reloading NGINX web server..."
 
 ynh_systemd_action --service_name=nginx --action=reload
 

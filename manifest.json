@@ -3,19 +3,19 @@
     "id": "couchpotato",
     "packaging_format": 1,
     "description": {
-      "en": "Automatic movie downloader",
-      "fr": "Téléchargement automatisé de film"
+        "en": "Automatic movie downloader",
+        "fr": "Téléchargement automatisé de film"
     },
-    "version": "3.0.1~ynh1",
+    "version": "3.0.1~ynh2",
     "url": "https://couchpota.to/",
-    "license": "free",
+    "license": "GPL-3.0-only",
     "maintainer": {
         "name": "Snipees",
         "email": "snipees@wareziens.net",
         "url": "https://github.com/Snipees"
     },
     "requirements": {
-        "yunohost": ">= 3.5"
+        "yunohost": ">= 4.2.0"
     },
     "multi_instance": false,
     "services": [
@@ -26,19 +26,11 @@
             {
                 "name": "domain",
                 "type": "domain",
-                "ask": {
-                    "en": "Choose a domain for CouchPotato",
-                    "fr": "Choisissez un domaine pour CouchPotato"
-                },
                 "example": "example.com"
             },
             {
                 "name": "path",
                 "type": "path",
-                "ask": {
-                    "en": "Choose a path for CouchPotato",
-                    "fr": "Choisissez un chemin pour CouchPotato"
-                },
                 "example": "/couchpotato",
                 "default": "/couchpotato"
             }

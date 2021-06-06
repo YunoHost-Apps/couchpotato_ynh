@@ -1,4 +1,4 @@
-## <img src="https://github.com/binhex/docker-templates/raw/master/binhex/images/couchpotato-icon.png" height="32" align="top"> CouchPotato <a href="https://yunohost.org/#/apps_in_progress_en"><img src="http://pix.toile-libre.org/upload/original/1440352021.png" height="32" align="right"></a>
+# CouchPotato for YunoHost
 
 [![Integration level](https://dash.yunohost.org/integration/couchpotato.svg)](https://dash.yunohost.org/appci/app/couchpotato) ![](https://ci-apps.yunohost.org/ci/badges/couchpotato.status.svg) ![](https://ci-apps.yunohost.org/ci/badges/couchpotato.maintain.svg)  
 [![Install CouchPotato with YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=couchpotato)
