@@ -210,7 +210,8 @@ fi
 #=================================================
 ynh_script_progression --message="Updating a configuration file..."
 
-ynh_add_config --template="../conf/couchpotato.conf" --destination="$final_path/settings.conf"
+ynh_backup_if_checksum_is_different --file="$final_path/settings.conf"
+#ynh_add_config --template="../conf/couchpotato.conf" --destination="$final_path/settings.conf"
 
 chmod 600 "$final_path/settings.conf"
 chown $app:$app "$final_path/settings.conf"
