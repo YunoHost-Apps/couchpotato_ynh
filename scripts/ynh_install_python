@@ -188,7 +188,7 @@ ynh_install_python () {
     # Install the requested version of Python
     local final_python_version=$(pyenv latest --print $python_version)
     ynh_print_info --message="Installation of Python-$python_version"
-    pyenv install --skip-existing $final_python_version > /dev/null 2>&1
+    ynh_exec_warn_less pyenv install --skip-existing $final_python_version > /dev/null 2>&1
 
     # Store python_version into the config of this app
     ynh_app_setting_set --app=$YNH_APP_INSTANCE_NAME --key=python_version --value=$python_version
