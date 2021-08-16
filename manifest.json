@@ -8,6 +8,11 @@
     },
     "version": "3.0.1~ynh3",
     "url": "https://couchpota.to/",
+    "upstream": {
+        "license": "GPL-3.0-only",
+        "website": "https://couchpota.to",
+        "code": "https://github.com/CouchPotato/CouchPotatoServer"
+    },
     "license": "GPL-3.0-only",
     "maintainer": {
         "name": "Snipees",
