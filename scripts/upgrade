@@ -72,7 +72,7 @@ if [ -z "$datadir" ]; then
 fi
 
 # If settings.conf is not at the right place, move it
-if [ -f "$datadir/settings.conf" ]; then
+if [ ! -f "$datadir/settings.conf" ]; then
 	ynh_delete_file_checksum --file="$final_path/settings.conf"
 	mv "$final_path/settings.conf" "$datadir/settings.conf"
 	ynh_store_file_checksum --file="$datadir/settings.conf"
