@@ -71,6 +71,16 @@ if [ -z "$datadir" ]; then
 	ynh_app_setting_delete --app=$app --key=app_data_dir
 fi
 
+# If settings.conf is not at the right place, move it
+if [ -f "$datadir/settings.conf" ]; then
+	ynh_delete_file_checksum --file="$final_path/settings.conf"
+	mv "$final_path/settings.conf" "$datadir/settings.conf"
+	ynh_store_file_checksum --file="$datadir/settings.conf"
+	
+	chmod 600 "$datadir/settings.conf"
+	chown $app:$app "$datadir/settings.conf"
+fi
+
 # Cleaning legacy permissions
 if ynh_legacy_permissions_exists; then
 	ynh_legacy_permissions_delete_all
@@ -211,11 +221,10 @@ fi
 #=================================================
 ynh_script_progression --message="Updating a configuration file..."
 
-ynh_backup_if_checksum_is_different --file="$final_path/settings.conf"
-#ynh_add_config --template="../conf/couchpotato.conf" --destination="$final_path/settings.conf"
+ynh_backup_if_checksum_is_different --file="$datadir/settings.conf"
 
-chmod 600 "$final_path/settings.conf"
-chown $app:$app "$final_path/settings.conf"
+chmod 600 "$datadir/settings.conf"
+chown $app:$app "$datadir/settings.conf"
 
 #=================================================
 # CONFIGURE LOGS

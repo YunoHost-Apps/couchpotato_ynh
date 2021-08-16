@@ -204,10 +204,10 @@ fi
 #=================================================
 ynh_script_progression --message="Adding a configuration file..."
 
-ynh_add_config --template="../conf/couchpotato.conf" --destination="$final_path/settings.conf"
+ynh_add_config --template="../conf/couchpotato.conf" --destination="$datadir/settings.conf"
 
-chmod 600 "$final_path/settings.conf"
-chown $app:$app "$final_path/settings.conf"
+chmod 600 "$datadir/settings.conf"
+chown $app:$app "$datadir/settings.conf"
 
 #=================================================
 # SETUP SYSTEMD
