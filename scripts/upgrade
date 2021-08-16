@@ -68,6 +68,7 @@ fi
 if [ -z "$datadir" ]; then
 	datadir=/home/yunohost.app/$app
 	ynh_app_setting_set --app=$app --key=datadir --value=$datadir
+	ynh_app_setting_delete --app=$app --key=app_data_dir
 fi
 
 # Cleaning legacy permissions
