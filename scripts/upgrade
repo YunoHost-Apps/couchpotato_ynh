@@ -21,7 +21,7 @@ domain=$(ynh_app_setting_get --app=$app --key=domain)
 path_url=$(ynh_app_setting_get --app=$app --key=path)
 port=$(ynh_app_setting_get --app=$app --key=port)
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
-app_data_dir=$(ynh_app_setting_get --app=$app --key=app_data_dir)
+datadir=$(ynh_app_setting_get --app=$app --key=datadir)
 
 #=================================================
 # CHECK VERSION
@@ -64,10 +64,10 @@ if [ -z "$final_path" ]; then
 	ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 fi
 
-# If app_data_dir doesn't exist, create it
-if [ -z "$app_data_dir" ]; then
-	app_data_dir=/home/yunohost.app/$app
-	ynh_app_setting_set --app=$app --key=app_data_dir --value=$app_data_dir
+# If datadir doesn't exist, create it
+if [ -z "$datadir" ]; then
+	datadir=/home/yunohost.app/$app
+	ynh_app_setting_set --app=$app --key=datadir --value=$datadir
 fi
 
 # Cleaning legacy permissions
