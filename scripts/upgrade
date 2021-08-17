@@ -21,7 +21,7 @@ domain=$(ynh_app_setting_get --app=$app --key=domain)
 path_url=$(ynh_app_setting_get --app=$app --key=path)
 port=$(ynh_app_setting_get --app=$app --key=port)
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
-app_data_dir=$(ynh_app_setting_get --app=$app --key=app_data_dir)
+datadir=$(ynh_app_setting_get --app=$app --key=datadir)
 
 #=================================================
 # CHECK VERSION
@@ -64,10 +64,21 @@ if [ -z "$final_path" ]; then
 	ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 fi
 
-# If app_data_dir doesn't exist, create it
-if [ -z "$app_data_dir" ]; then
-	app_data_dir=/home/yunohost.app/$app
-	ynh_app_setting_set --app=$app --key=app_data_dir --value=$app_data_dir
+# If datadir doesn't exist, create it
+if [ -z "$datadir" ]; then
+	datadir=/home/yunohost.app/$app
+	ynh_app_setting_set --app=$app --key=datadir --value=$datadir
+	ynh_app_setting_delete --app=$app --key=app_data_dir
+fi
+
+# If settings.conf is not at the right place, move it
+if [ ! -f "$datadir/settings.conf" ]; then
+	ynh_delete_file_checksum --file="$final_path/settings.conf"
+	mv "$final_path/settings.conf" "$datadir/settings.conf"
+	ynh_store_file_checksum --file="$datadir/settings.conf"
+	
+	chmod 600 "$datadir/settings.conf"
+	chown $app:$app "$datadir/settings.conf"
 fi
 
 # Cleaning legacy permissions
@@ -210,11 +221,10 @@ fi
 #=================================================
 ynh_script_progression --message="Updating a configuration file..."
 
-ynh_backup_if_checksum_is_different --file="$final_path/settings.conf"
-#ynh_add_config --template="../conf/couchpotato.conf" --destination="$final_path/settings.conf"
+ynh_backup_if_checksum_is_different --file="$datadir/settings.conf"
 
-chmod 600 "$final_path/settings.conf"
-chown $app:$app "$final_path/settings.conf"
+chmod 600 "$datadir/settings.conf"
+chown $app:$app "$datadir/settings.conf"
 
 #=================================================
 # CONFIGURE LOGS
@@ -223,6 +233,9 @@ ynh_script_progression --message="Configuring logs..."
 
 # Redirect logs directory
 app_logs_dir="/var/log/$app"
+mkdir -p $app_logs_dir
+chown -R $app:$app $app_logs_dir
+chmod +x -R $app_logs_dir
 ynh_replace_string --match_string="self.log_dir =.*" --replace_string="self.log_dir = '$app_logs_dir'" --target_file="$final_path/CouchPotato.py"
 
 #=================================================
