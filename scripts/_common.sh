@@ -4,9 +4,8 @@
 # COMMON VARIABLES
 #=================================================
 
-# dependencies used by the app
+# dependencies used by the app (must be on a single line)
 pkg_dependencies=""
-#python-pip python-virtualenv python-dev uwsgi uwsgi-plugin-python
 
 python_version=2.7.18
 
