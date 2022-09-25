@@ -5,7 +5,7 @@ It shall NOT be edited by hand.
 
 # CouchPotato for YunoHost
 
-[![Integration level](https://dash.yunohost.org/integration/couchpotato.svg)](https://dash.yunohost.org/appci/app/couchpotato) ![](https://ci-apps.yunohost.org/ci/badges/couchpotato.status.svg) ![](https://ci-apps.yunohost.org/ci/badges/couchpotato.maintain.svg)  
+[![Integration level](https://dash.yunohost.org/integration/couchpotato.svg)](https://dash.yunohost.org/appci/app/couchpotato) ![Working status](https://ci-apps.yunohost.org/ci/badges/couchpotato.status.svg) ![Maintenance status](https://ci-apps.yunohost.org/ci/badges/couchpotato.maintain.svg)  
 [![Install CouchPotato with YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=couchpotato)
 
 *[Lire ce readme en français.](./README_fr.md)*
@@ -15,34 +15,38 @@ If you don't have YunoHost, please consult [the guide](https://yunohost.org/#/in
 
 ## Overview
 
-Automatic movie downloader
-
-**Shipped version:** 3.0.1~ynh3
+Download movies automatically, easily and in the best quality as soon as they are available.
 
 
+**Shipped version:** 3.0.1~ynh4
+
+
+## Screenshots
+
+![Screenshot of CouchPotato](./doc/screenshots/couchpotato_interface.png)
 
 ## Disclaimers / important information
 
-* Other infos that people should be aware of, such as:
-    * Integrates automatically with [transmission_ynh](https://github.com/YunoHost-Apps/transmission_ynh) (or tries to...),
-    * Integrates [YunoHost multimedia](https://github.com/YunoHost-Apps/yunohost.multimedia) folder structure
+* Integrates automatically with [transmission_ynh](https://github.com/YunoHost-Apps/transmission_ynh) (or tries to...),
+* Integrates [YunoHost multimedia](https://github.com/YunoHost-Apps/yunohost.multimedia) folder structure
 
 ## Documentation and resources
 
-* Official app website: https://couchpota.to
-* Upstream app code repository: https://github.com/CouchPotato/CouchPotatoServer
-* YunoHost documentation for this app: https://yunohost.org/app_couchpotato
-* Report a bug: https://github.com/YunoHost-Apps/couchpotato_ynh/issues
+* Official app website: <https://couchpota.to>
+* Upstream app code repository: <https://github.com/CouchPotato/CouchPotatoServer>
+* YunoHost documentation for this app: <https://yunohost.org/app_couchpotato>
+* Report a bug: <https://github.com/YunoHost-Apps/couchpotato_ynh/issues>
 
 ## Developer info
 
 Please send your pull request to the [testing branch](https://github.com/YunoHost-Apps/couchpotato_ynh/tree/testing).
 
 To try the testing branch, please proceed like that.
-```
+
+``` bash
 sudo yunohost app install https://github.com/YunoHost-Apps/couchpotato_ynh/tree/testing --debug
 or
 sudo yunohost app upgrade couchpotato -u https://github.com/YunoHost-Apps/couchpotato_ynh/tree/testing --debug
 ```
 
-**More info regarding app packaging:** https://yunohost.org/packaging_apps
+**More info regarding app packaging:** <https://yunohost.org/packaging_apps>
