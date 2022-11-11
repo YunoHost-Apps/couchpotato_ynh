@@ -7,7 +7,7 @@
 # dependencies used by the app (must be on a single line)
 pkg_dependencies=""
 
-python_version=2.7.18
+python_version=3.8.11
 
 source="https://github.com/CouchPotato/CouchPotatoServer"
 
