@@ -18,8 +18,7 @@ Si vous n'avez pas YunoHost, regardez [ici](https://yunohost.org/#/install) pour
 Download movies automatically, easily and in the best quality as soon as they are available.
 
 
-**Version incluse :** 3.0.1~ynh4
-
+**Version incluse :** 3.0.1~ynh4
 
 ## Captures d'écran
 
