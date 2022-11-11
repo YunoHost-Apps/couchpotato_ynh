@@ -20,7 +20,6 @@ Download movies automatically, easily and in the best quality as soon as they ar
 
 **Shipped version:** 3.0.1~ynh4
 
-
 ## Screenshots
 
 ![Screenshot of CouchPotato](./doc/screenshots/couchpotato_interface.png)
