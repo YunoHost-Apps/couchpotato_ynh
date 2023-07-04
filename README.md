@@ -5,7 +5,8 @@ It shall NOT be edited by hand.
 
 # CouchPotato for YunoHost
 
-[![Integration level](https://dash.yunohost.org/integration/couchpotato.svg)](https://dash.yunohost.org/appci/app/couchpotato) ![Working status](https://ci-apps.yunohost.org/ci/badges/couchpotato.status.svg) ![Maintenance status](https://ci-apps.yunohost.org/ci/badges/couchpotato.maintain.svg)  
+[![Integration level](https://dash.yunohost.org/integration/couchpotato.svg)](https://dash.yunohost.org/appci/app/couchpotato) ![Working status](https://ci-apps.yunohost.org/ci/badges/couchpotato.status.svg) ![Maintenance status](https://ci-apps.yunohost.org/ci/badges/couchpotato.maintain.svg)
+
 [![Install CouchPotato with YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=couchpotato)
 
 *[Lire ce readme en français.](./README_fr.md)*
@@ -28,6 +29,10 @@ Download movies automatically, easily and in the best quality as soon as they ar
 
 * Integrates automatically with [transmission_ynh](https://github.com/YunoHost-Apps/transmission_ynh) (or tries to...),
 * Integrates [YunoHost multimedia](https://github.com/YunoHost-Apps/yunohost.multimedia) folder structure
+
+## :red_circle: Antifeatures
+
+- **Package not maintained**: This YunoHost package is not maintained and needs adoption.
 
 ## Documentation and resources
 

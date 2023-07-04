@@ -5,34 +5,39 @@ It shall NOT be edited by hand.
 
 # CouchPotato pour YunoHost
 
-[![Niveau d'intégration](https://dash.yunohost.org/integration/couchpotato.svg)](https://dash.yunohost.org/appci/app/couchpotato) ![Statut du fonctionnement](https://ci-apps.yunohost.org/ci/badges/couchpotato.status.svg) ![Statut de maintenance](https://ci-apps.yunohost.org/ci/badges/couchpotato.maintain.svg)  
+[![Niveau d’intégration](https://dash.yunohost.org/integration/couchpotato.svg)](https://dash.yunohost.org/appci/app/couchpotato) ![Statut du fonctionnement](https://ci-apps.yunohost.org/ci/badges/couchpotato.status.svg) ![Statut de maintenance](https://ci-apps.yunohost.org/ci/badges/couchpotato.maintain.svg)
+
 [![Installer CouchPotato avec YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=couchpotato)
 
 *[Read this readme in english.](./README.md)*
 
-> *Ce package vous permet d'installer CouchPotato rapidement et simplement sur un serveur YunoHost.
-Si vous n'avez pas YunoHost, regardez [ici](https://yunohost.org/#/install) pour savoir comment l'installer et en profiter.*
+> *Ce package vous permet d’installer CouchPotato rapidement et simplement sur un serveur YunoHost.
+Si vous n’avez pas YunoHost, regardez [ici](https://yunohost.org/#/install) pour savoir comment l’installer et en profiter.*
 
-## Vue d'ensemble
+## Vue d’ensemble
 
 Download movies automatically, easily and in the best quality as soon as they are available.
 
 
 **Version incluse :** 3.0.1~ynh4
 
-## Captures d'écran
+## Captures d’écran
 
-![Capture d'écran de CouchPotato](./doc/screenshots/couchpotato_interface.png)
+![Capture d’écran de CouchPotato](./doc/screenshots/couchpotato_interface.png)
 
 ## Avertissements / informations importantes
 
 * Integrates automatically with [transmission_ynh](https://github.com/YunoHost-Apps/transmission_ynh) (or tries to...),
 * Integrates [YunoHost multimedia](https://github.com/YunoHost-Apps/yunohost.multimedia) folder structure
 
+## :red_circle: Fonctions indésirables
+
+- **Package not maintained**: This YunoHost package is not maintained and needs adoption.
+
 ## Documentations et ressources
 
-* Site officiel de l'app : <https://couchpota.to>
-* Dépôt de code officiel de l'app : <https://github.com/CouchPotato/CouchPotatoServer>
+* Site officiel de l’app : <https://couchpota.to>
+* Dépôt de code officiel de l’app : <https://github.com/CouchPotato/CouchPotatoServer>
 * Documentation YunoHost pour cette app : <https://yunohost.org/app_couchpotato>
 * Signaler un bug : <https://github.com/YunoHost-Apps/couchpotato_ynh/issues>
 
@@ -48,4 +53,4 @@ ou
 sudo yunohost app upgrade couchpotato -u https://github.com/YunoHost-Apps/couchpotato_ynh/tree/testing --debug
 ```
 
-**Plus d'infos sur le packaging d'applications :** <https://yunohost.org/packaging_apps>
+**Plus d’infos sur le packaging d’applications :** <https://yunohost.org/packaging_apps>
